@@ -10,7 +10,7 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        log.info("Start loading HamGift!");
+        log.info("Start loading HamGift");
 
 
         log.info("Loading completed.");
