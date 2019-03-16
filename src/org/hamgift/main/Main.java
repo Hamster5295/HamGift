@@ -12,6 +12,7 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         log.info("Start loading HamGift");
 
+        getDataFolder().mkdirs();       // Create Folder
 
 
         log.info("Loading completed.");
