@@ -13,6 +13,7 @@ public class Main extends JavaPlugin {
         log.info("Start loading HamGift");
 
 
+
         log.info("Loading completed.");
     }
 }
