@@ -11,8 +11,9 @@ public class Output {
 
     public static void writeNormal(File file, Object what) throws IOException {
 
-        if(!file.exists()) return;
         if(file.isDirectory()) return;
+        if(!file.exists())
+            file.createNewFile();
 
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
         out.writeObject(what);

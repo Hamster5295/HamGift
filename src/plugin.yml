@@ -1,3 +1,28 @@
 name: HamGift
 main: org.hamgift.main.Main
 version: 1.0
+
+permissions:
+  hgift.*:
+    description: The permission about hgifts.
+    children:
+      hgift.getOnce: true
+      hgift.getDaily: true
+      hgift.getWeekly: true
+      hgift.set: true
+
+  hgift.getOnce:
+    description: Allows to get hgifts(type:Once).
+    default: true
+
+  hgift.getDaily:
+    description: Allows to get hgifts(type:Once).
+    default: true
+
+  hgift.getWeekly:
+    description: Allows to get hgifts(type:Once).
+    default: true
+
+  hgift.set:
+    description: Allows to set hgifts
+    default: op
