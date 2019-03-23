@@ -11,8 +11,9 @@ public class Input {
 
     public static Object readNormal(File file) throws IOException, ClassNotFoundException {
 
-        if(!file.exists()) return null;
         if(file.isDirectory()) return null;
+        if(!file.exists())
+            file.createNewFile();
 
         if(file.length() != 0){
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));

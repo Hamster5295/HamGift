@@ -22,14 +22,21 @@ public class HGift implements Serializable {
     private Inventory inv;
     private ArrayList<UUID> got;
     private GiftType type;
+    private String permission;
+    private int timer;
     private File f;             //Save path
 
-    public void HGift(String name,Inventory inv,GiftType type){
+    public void HGift(String name,Inventory inv,GiftType type,String permission){
+        if(type.equals(GiftType.TIMER)){
+            throw new NullPointerException("Cannot find the timer!");
+        }
+
         this.name = name;
         this.inv = inv;
         this.type = type;
+        this.permission = permission;
 
-        f = new File(Data.dataFolder+name+".bin");
+        this.f = new File(Data.dataFolder+File.separator+name+"_HG.bin");
 
         try {
             Output.writeNormal(f,this);
@@ -40,43 +47,64 @@ public class HGift implements Serializable {
         Data.gifts.replace(name,this);
     }
 
-    public void load(){
-        switch (type){
-            case ONLY_ONCE:
-                try {
-                    this.got = (ArrayList<UUID>) readNormal(f);
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                break;
-
-            case DAILY:
-
-                break;
-
-            case WEEKLY:
-
-                break;
+    public void HGift(String name,Inventory inv,GiftType type,String permission,int time){
+        if(type.equals(GiftType.TIMER)){
+            this.timer = time;
         }
+
+        this.name = name;
+        this.inv = inv;
+        this.type = type;
+        this.permission = permission;
+
+        this.f = new File(Data.dataFolder+File.separator+name+"_HG.bin");
+
+        try {
+            Output.writeNormal(f,this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Data.gifts.replace(name,this);
     }
 
     public void give(Player p) {
+        Inventory pi = p.getInventory();
+
         if (!p.isOnline()) return;
         if(!p.isValid()) return;
 
+        if(!p.hasPermission(permission)) {
+            p.sendMessage(ChatColor.RED+"你没有权限领取哦..");
+            return;
+        }
+
+        if(got.contains(p.getUniqueId())){
+            p.sendMessage(ChatColor.RED+"你已经领取过了..");
+            return;
+        }
+
+        if(pi.getMaxStackSize() - pi.getSize() < InvUtils.getItems(pi).size()){
+            p.sendMessage(ChatColor.RED+"背包没有足够的空间!");
+            return;
+        }
+
+        pi.addItem((ItemStack[]) InvUtils.getItems(pi).toArray());
+        got.add(p.getUniqueId());
+    }
+
+    public void upDate(){
         switch (type){
             case ONLY_ONCE:
-                if(!p.hasPermission("hgift.getOnce")) return;
-                if(got.contains(p.getUniqueId())) return;
+                break;
 
-                Inventory pi = p.getInventory();
+            case DAILY:
+                got.clear();
+                break;
 
-                if(pi.getMaxStackSize() - pi.getSize() < InvUtils.getItems(pi).size()){
-                    p.sendMessage(ChatColor.RED+"背包没有足够的空间!");
-                    return;
-                }else {
-                    pi.addItem((ItemStack[]) InvUtils.getItems(pi).toArray());
-                }
+            case TIMER:
+                if(timer==0)
+                    got.clear();
                 break;
         }
     }

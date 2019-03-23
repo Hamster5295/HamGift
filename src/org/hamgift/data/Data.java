@@ -12,4 +12,13 @@ public class Data {
     public static HashMap<String, HGift> gifts = new HashMap<>();
     public static File dataFolder;
 
+    /**
+     * @Param infoFolder is used to save information
+     * Read as a String Array.
+     * Save as the format below:
+     *
+     * [0]disabled time
+     *
+     * */
+    public static File infoFolder = new File("info.bin");
 }
