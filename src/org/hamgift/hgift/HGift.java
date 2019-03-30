@@ -14,8 +14,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.hamgift.utils.Input.readNormal;
-
 public class HGift implements Serializable {
 
     private String name;
@@ -65,7 +63,13 @@ public class HGift implements Serializable {
             e.printStackTrace();
         }
 
+
+
         Data.gifts.replace(name,this);
+    }
+
+    public File getFile(){
+        return f;
     }
 
     public void give(Player p) {

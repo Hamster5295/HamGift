@@ -1,18 +1,24 @@
 package org.hamgift.main;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.hamgift.commandexecuter.CE_hgift;
 import org.hamgift.data.Data;
 import org.hamgift.hgift.HGift;
+import org.hamgift.thread.DateCheckerThread;
 import org.hamgift.utils.Input;
+import org.hamgift.utils.Output;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.logging.Logger;
 
 public class Main extends JavaPlugin {
 
     private Logger log = getLogger();
+    private DateCheckerThread DCTread = new DateCheckerThread(3600*1000);
 
     @Override
     public void onEnable() {
@@ -25,7 +31,19 @@ public class Main extends JavaPlugin {
             e.printStackTrace();
         }
 
+        this.getCommand("hg").setExecutor(new CE_hgift(this));
+        this.getCommand("hgift").setExecutor(new CE_hgift(this));
+
         log.info("Loading completed.");
+    }
+
+    @Override
+    public void onDisable() {
+        log.info("Start disabling HamGift");
+
+        saveFiles();
+
+        log.info("Done");
     }
 
     private void setFiles(){
@@ -36,9 +54,7 @@ public class Main extends JavaPlugin {
 
     private void readFiles() throws IOException, ClassNotFoundException {
         File[] files = getDataFolder().listFiles();
-        Thread thread = new Thread(()->{
-            Data.gifts.forEach((k,gift)-> gift.upDate());
-        });
+        boolean flag = false;
 
         for (File file: files
              ) {
@@ -46,20 +62,37 @@ public class Main extends JavaPlugin {
             switch (fn){
                 case "info.bin":
                     String[] buff = (String[]) Input.readNormal(file);
-                    long last = Integer.parseInt(buff[0]);
-                    if((System.currentTimeMillis() - last) >= 24*3600){
-                        thread.start();
-                        thread.interrupt();
-                    }
+                    DCTread.setBefore(Integer.parseInt(buff[0]));
                     break;
 
                 default:
                     if(fn.endsWith("_HG.bin")){
                         Data.gifts.put(fn.split("_")[0],(HGift) Input.readNormal(file));
                     }
+                    break;
             }
-
-            thread.notify();
         }
+
+        DCTread.start();
+    }
+
+    private void saveFiles() {
+        Calendar c = Calendar.getInstance();
+        String[] info = {
+                c.get(Calendar.DAY_OF_YEAR)+""
+        };
+        try {
+            Output.writeNormal(Data.infoFolder,info);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Data.gifts.forEach((k, gift)-> {
+            try {
+                Output.writeNormal(gift.getFile(),gift);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
